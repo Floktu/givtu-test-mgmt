@@ -15,4 +15,3 @@ The repository provides the tooling for testing our backend environments.
 - [ ] Use a password to ensure only givtu users can access api
 - [ ] Do not make any of these testing features accessible during production
 
-# givtu-test-mgmt
