@@ -1,5 +1,9 @@
 import requests
 
+SERVICE_PERCTENT_FEE = 0.03
+SERVICE_FLAT_FEE = 0.44
+TICKET_PRICE = 1
+
 
 def reset_db(cursor, app_url):
     qry = '''
@@ -35,3 +39,7 @@ def reset_db(cursor, app_url):
 
 def create_games(app_url):
     requests.get(f'{app_url}/test-purchase')
+
+
+def calculate_service_fee(qty):
+    return (qty * SERVICE_PERCTENT_FEE) + SERVICE_FLAT_FEE
