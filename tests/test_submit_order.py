@@ -1,6 +1,6 @@
 import requests
 from config.config import api_config
-from reset_app import reset_db
+from utils import calculate_service_fee
 
 
 # Test Objective: Ensure that a single payment and ticket order is processed correctly.
@@ -19,9 +19,12 @@ def test_submit_order_single_ticket(user_id, app_env, db_connection):
     cursor = db_connection.cursor(dictionary=True)
 
     # 2. Prepare the request payload with order details
+    qty = 1
+    trans_service_fee = calculate_service_fee(qty)
+    trans_total = qty + trans_service_fee
     body = {
-        'transTotal': 1.47,
-        'transServiceFee': 0.47,
+        'transTotal': trans_total,
+        'transServiceFee': trans_service_fee,
         'subdomain': "",
         'numOfGames': 8,
         'userid': user_id,
@@ -30,7 +33,7 @@ def test_submit_order_single_ticket(user_id, app_env, db_connection):
                 'isgroup': 0,
                 'charityid': 35,
                 'prizeid': 74,
-                'qty': 1,
+                'qty': qty,
                 'prize': 'LG Signature',
                 'nfp': 'Backtrack',
                 'amount': 1,
@@ -43,9 +46,14 @@ def test_submit_order_single_ticket(user_id, app_env, db_connection):
             }
         ]
     }
-
+    api = api_config[app_env]
     # 3. Make the API request to create the order
-    response = requests.post(f'{api_config[app_env]}/test-purchase', json=body)
+    response = requests.post(f'{api}/test-purchase', json=body)
+
+    # a. Check if current subscriber
+    cursor.execute("SELECT * FROM subscription WHERE status = 1 AND user_id = %s", (user_id,))
+    subscription_res = cursor.fetchone()
+    assert len(subscription_res) > 0
 
     # 4. Assert the response and extract the order ID
     assert response.status_code == 200
@@ -75,7 +83,9 @@ def test_submit_order_single_ticket(user_id, app_env, db_connection):
     assert len(ticket_owner_res) == 1 and ticket_owner_res[0]['type'] == 1
 
     # e. Verify that Game Records have the right amount of tickets allocated
-
+    cursor.execute("SELECT * FROM ticket_owners WHERE order_ticket_id = %s", (order_ticket_res['id'],))
+    ticket_owner_res = cursor.fetchall()
+    assert len(ticket_owner_res) == 1 and ticket_owner_res[0]['type'] == 1
     # e. Verify the payments records
 
     # 6. Close the cursor
@@ -95,7 +105,51 @@ def test_submit_order_multi_ticket(user_id, app_env, db_connection):
 # 2. Check that subscription is created correctly for multi
 # 3. Check that fortune keys are allocated correctly
 def test_submit_order_single_and_multi_tickets(user_id, app_env, db_connection):
-    pass
+    cursor = db_connection.cursor(dictionary=True)
+
+    # 2. Prepare the request payload with order details
+    qty = 1
+    trans_service_fee = calculate_service_fee(qty)
+    trans_total = qty + trans_service_fee
+    body = {
+        'transTotal': trans_total,
+        'transServiceFee': trans_service_fee,
+        'subdomain': "",
+        'numOfGames': 8,
+        'userid': user_id,
+        'cartlist': [
+            {
+                'isgroup': 0,
+                'charityid': 35,
+                'prizeid': 74,
+                'qty': qty,
+                'prize': 'LG Signature',
+                'nfp': 'Backtrack',
+                'amount': 1,
+                'draw': 54,
+                'image': '/prizes/prize_74/cubeImage20240812133802.png',
+                'subscription': 0,
+                'customprize': "",
+                'customnfp': "",
+                'hascustom': 0
+            },
+            {
+                'isgroup': 0,
+                'charityid': 35,
+                'prizeid': 74,
+                'qty': qty,
+                'prize': 'LG Signature',
+                'nfp': 'Backtrack',
+                'amount': 1,
+                'draw': 54,
+                'image': '/prizes/prize_74/cubeImage20240812133802.png',
+                'subscription': 1,
+                'customprize': "",
+                'customnfp': "",
+                'hascustom': 0
+            }
+        ]
+    }
 
 
 # Test Objective: Ensure that multiple single ticket in combos in same cart are processed correctly.

@@ -4,7 +4,7 @@ db_config = {
         {
             'user': 'admin',
             'password': 'terraformdb123',
-            'host': 'givtudevsydney-1.coyeaggqwolq.ap-southeast-2.rds.amazonaws.com',
+            'host': 'givtu-dev-sydney-database.coyeaggqwolq.ap-southeast-2.rds.amazonaws.com',
             'port': 3306,
             'database': 'givtudevsydney',
             'raise_on_warnings': False,
@@ -42,5 +42,5 @@ api_config = {
     'local': 'http://localhost:8741',
     'staging': 'https://staging.givtu.com',
     'gamedev': 'https://gamedev.givtu.com',
-    'dev': 'https://givtu-dev-sydney.givtu.com/'
+    'dev': 'https://givtu-dev-sydney.givtu.com'
 }

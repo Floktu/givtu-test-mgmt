@@ -27,7 +27,7 @@ def db_env():
 
 @pytest.fixture
 def user_id():
-    return 79
+    return 308
 
 
 @pytest.fixture
