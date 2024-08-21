@@ -1,9 +1,29 @@
 import requests
+import time
 from datetime import datetime
 
-SERVICE_PERCTENT_FEE = 0.03
+SERVICE_PERCENT_FEE = 0.03
 SERVICE_FLAT_FEE = 0.44
 TICKET_PRICE = 1
+WAIT_SECONDS = 10
+
+
+def get_games_from_set(conn, i):
+    time.sleep(10)
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute('''
+    select * from draws where draw_schedule_id = (
+        SELECT MAX(id) as id
+        FROM (
+            SELECT id 
+            FROM draw_schedule 
+            WHERE active = 1 
+            LIMIT %s
+        ) AS subquery);''', (i,))
+    results = cursor.fetchall()
+    cursor.close()
+    conn.commit()
+    return results
 
 
 def reset_db(conn):
@@ -52,7 +72,7 @@ def create_short_games(app_url):
 
 
 def calculate_service_fee(qty):
-    return (qty * SERVICE_PERCTENT_FEE) + SERVICE_FLAT_FEE
+    return (qty * SERVICE_PERCENT_FEE) + SERVICE_FLAT_FEE
 
 
 def create_combo(qty, is_multi, user_id):
@@ -123,3 +143,84 @@ def create_user(i, conn):
 
 def mock_purchase(api, body):
     return requests.post(f'{api}/test-purchase', json=body)
+
+
+def get_active_draws(conn):
+    time.sleep(WAIT_SECONDS)
+    cursor = conn.cursor(dictionary=True)
+    grouped = {}
+    draw_schedules = get_active_sets(conn)
+
+    for idx, ds in enumerate(draw_schedules):
+        cursor.execute(
+            "SELECT * from draws where draw_schedule_id = %s order by launched_date",
+            (ds['id'],))
+        results = cursor.fetchall()
+        grouped[idx + 1] = results
+
+    cursor.close()
+    conn.commit()
+    return grouped
+
+
+def get_active_sets(conn):
+    time.sleep(WAIT_SECONDS)
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * from draw_schedule where active = 1")
+    results = cursor.fetchall()
+    cursor.close()
+    conn.commit()
+    return results
+
+
+def get_ticket_owners(conn, order_id):
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute(
+        "SELECT * from ticket_owners where order_ticket_id in (select id from order_ticket where orders_id = %s)",
+        (order_id,))
+    results = cursor.fetchall()
+    cursor.close()
+    conn.commit()
+    return results
+
+
+def get_tickets_sold(conn, draw_id):
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute(
+        "SELECT * from ticket_owners where draw_id = %s",
+        (draw_id,))
+    results = cursor.fetchall()
+    cursor.close()
+    conn.commit()
+    return results
+
+
+def get_fortune_keys_per_order(conn, order_id):
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute(
+        "SELECT * from fortune_key_audit where orders_id = %s",
+        (order_id,))
+    results = cursor.fetchall()
+    cursor.close()
+    conn.commit()
+    return results
+
+
+def get_fortune_keys_per_user(conn, user_id):
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute(
+        "SELECT * from fortune_key_audit where user_id = %s",
+        (user_id,))
+    results = cursor.fetchall()
+    cursor.close()
+    conn.commit()
+    return results
+
+
+def remove_key_tickets(api, body):
+    return requests.post(f'{api}/remove-tickets-fkeys',
+                         json={'body': body})
+
+
+def sleep():
+    time.sleep(WAIT_SECONDS)

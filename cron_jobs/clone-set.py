@@ -15,7 +15,6 @@ def ping_clone_first_set():
         time.sleep(5)  # Wait for 1/2 minutes
 
 
-
 if __name__ == "__main__":
     # Create and start threads for each function
     thread1 = Thread(target=ping_clone_first_set)
