@@ -1,6 +1,9 @@
 import requests
 import time
 from datetime import datetime
+import mysql.connector
+from mysql.connector import Error
+from config.config import db_config, api_config
 
 SERVICE_PERCENT_FEE = 0.03
 SERVICE_FLAT_FEE = 0.44
@@ -224,3 +227,13 @@ def remove_key_tickets(api, body):
 
 def sleep():
     time.sleep(WAIT_SECONDS)
+
+
+if __name__ == "__main__":
+    try:
+        connection = mysql.connector.connect(**db_config['staging'])
+        reset_db(connection)
+        create_games(api_config['staging'])
+    except Error as e:
+        print(f"Error: {e}")
+        raise e
