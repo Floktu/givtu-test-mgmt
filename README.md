@@ -27,7 +27,7 @@ Displays the active and total keys for each user on a given date, with paginatio
 
 **Usage:**
 
-```bash
+```commandline
 python3 -m promo_keys.promo_keys_cli show-keys --date "YYYY-MM-DD HH:MM" --env <environment> --page-size <size>
 ```
 
@@ -39,7 +39,7 @@ python3 -m promo_keys.promo_keys_cli show-keys --date "YYYY-MM-DD HH:MM" --env <
 
 **Example:**
 
-```
+```bash
 python3 -m promo_keys.promo_keys_cli show-keys --date "2024-10-29 10:00:00" --env dev --page-size 20
 ```
 
@@ -49,7 +49,7 @@ Allocates a specified quantity of keys to users. The allocation can be based on 
 
 **Usage:**
 
-```bash
+```commandline
 python3 -m promo_keys.promo_keys_cli  allocate-keys --method <method> --value <value> --eval_date "YYYY-MM-DD HH:SS:MM" --active_date "YYYY-MM-DD HH:SS:MM" --env <environment> --filename <filename>
 ```
 
@@ -66,7 +66,7 @@ python3 -m promo_keys.promo_keys_cli  allocate-keys --method <method> --value <v
 **Example:**
 
 ```bash
-python3 -m promo_keys.promo_keys_cli --method 'fixed_qty' --value 1 --eval_date "2024-10-27 10:00:00" --active_date "2024-10-29 10:00:00" --env dev --filename test-run
+python3 -m promo_keys.promo_keys_cli  allocate-keys --method 'fixed_qty' --value 1 --eval_date "2024-10-27 10:00:00" --active_date "2024-10-29 10:00:00" --env dev --filename test-run
 ```
 
 
@@ -76,7 +76,7 @@ Exports key allocation data for each user on a specified date to a CSV file.
 **Usage:**
 
 
-```bash
+```commandline
 python3 -m promo_keys.promo_keys_cli export-key-table --date "YYYY-MM-DD HH:MM" --env <environment> --output <output>
 ```
 
@@ -92,7 +92,7 @@ python3 -m promo_keys.promo_keys_cli export-key-table --date "YYYY-MM-DD HH:MM" 
 
 
 ```bash
-python3 -m promo_keys.promo_keys_cli export-key-table --date "2024-10-29 10:00:00" --env staging --output
+python3 -m promo_keys.promo_keys_cli export-key-table --date "2024-10-29 10:00:00" --env dev --output
 ```
 
 <br><br>

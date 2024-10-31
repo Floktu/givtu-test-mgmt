@@ -6,6 +6,7 @@ import mysql.connector
 from datetime import datetime
 from tabulate import tabulate
 from config.config import db_config
+from config.config import api_config
 
 
 def get_keys_status(db_connection, date, page_size=10):
@@ -88,7 +89,7 @@ def get_keys_status(db_connection, date, page_size=10):
     cursor.close()
 
 
-def allocate(db_connection, method, value, eval_date, active_date, only_active_keys=False):
+def allocate(db_connection, method, value, eval_date, active_date, env, only_active_keys=False):
     # Convert eval_date string to datetime for comparison, if provided
     cursor = db_connection.cursor()
 
@@ -129,7 +130,8 @@ def allocate(db_connection, method, value, eval_date, active_date, only_active_k
                 'promotional': 'promo_code_example'  # Adjust this value as needed
             }
 
-            response = requests.post('http://localhost:8741/apiv3/cron/allocate-promo-keys', json=post_data)
+            api_base = api_config[env]
+            response = requests.post(f'{api_base}/apiv3/cron/allocate-promo-keys', json=post_data)
 
             if response.status_code == 200:
                 click.echo(click.style(
@@ -183,7 +185,7 @@ def allocate_keys(method, value, eval_date, active_date, only_active_keys, env, 
     if method == 'percentage_increase' and not (0 < value < 100):
         raise Exception(f"Invalid value for percentage_increase {value}")
 
-    allocate(connection, method, value, eval_date, active_date, only_active_keys)
+    allocate(connection, method, value, eval_date, active_date, env, only_active_keys)
 
     _export_key_table(eval_date, env, after_file)
 
