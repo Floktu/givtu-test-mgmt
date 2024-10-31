@@ -57,6 +57,9 @@ def reset_db(conn):
         "Truncate Table draws;",
         "Truncate Table drawing_winner_conf;",
         "Truncate Table voucher_conf;",
+        "Update fortune_key_shuffle_order set status = 0 where status = 1 or status = 2;",
+        "Update fortune_keys set status = 0, assign_date = Null, current_user_id = Null where assign_date is not null "
+        "or status = 1 or status = 2;",
         "SET FOREIGN_KEY_CHECKS = 1;"  # Enable foreign key checks again after truncating
     ]
 
@@ -156,7 +159,7 @@ def get_active_draws(conn):
 
     for idx, ds in enumerate(draw_schedules):
         cursor.execute(
-            "SELECT * from draws where draw_schedule_id = %s order by launched_date",
+            "SELECT * from draws where draw_schedule_id = %s and active = 1 order by launched_date",
             (ds['id'],))
         results = cursor.fetchall()
         grouped[idx + 1] = results
@@ -233,7 +236,7 @@ if __name__ == "__main__":
     try:
         connection = mysql.connector.connect(**db_config['staging'])
         reset_db(connection)
-        create_games(api_config['staging'])
+        create_games(api_config['local'])
     except Error as e:
         print(f"Error: {e}")
         raise e

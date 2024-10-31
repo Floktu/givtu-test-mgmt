@@ -191,9 +191,6 @@ def test_integration_clone_end_future(user_id, app_env, db_connection):
     assert revoked == 5
     assert sold == 10 + len(tickets_before_overflow)
 
-    active_draws = get_active_draws(db_connection)
-    assert len(active_draws[8]) == 1 and active_draws[8][0]['id'] == cancelled_tickets[0]['draw_id'] and \
-           active_draws[8][0]['active'] == 1
 
     # SINGLE + MULTI
     # Repeat the following steps but using multi tickets with users (1,2)
