@@ -33,33 +33,52 @@ def reset_db(conn):
     cursor = conn.cursor(dictionary=True)
     truncate_queries = [
         "SET FOREIGN_KEY_CHECKS = 0;",
-        "Truncate Table payment;",
-        "Truncate Table ticket_owners;",
+        "Truncate Table bank_accounts;",
+        "Truncate Table cms_ref;",
+        "Truncate Table contact_us;",
+
+        "Truncate Table drawing_winner_conf;",
+        "Truncate Table draws;",
+        "Truncate Table draw_schedule;",
+        "Truncate Table dreamlist;",
+        "Truncate Table draft_orders;",
+        "Truncate Table draw_winners;",
+
+        "Truncate Table event_log;",
+
+        "Truncate Table fortune_draws;",
+        "Truncate Table fortune_key_audit;",
+        "Update fortune_key_shuffle_order set status = 0 where status = 1;",
+        "Update fortune_keys set status = 0, user_id = Null where status = 1;",
+
+        "Truncate Table game_settlement;",
+
+        "Truncate Table news_cms;",
+
         "Truncate Table order_ticket;",
         "Truncate Table orders;",
         "Truncate Table order_group;",
-        "Truncate Table draft_orders;",
-        "Truncate Table vouchers_transaction;",
+        "Truncate Table otp_history;",
+        "Truncate Table payment;",
+
+        "Truncate Table ticket_owners;",
+
+        "Truncate Table profile_attempts;",
+
         "Truncate Table subscription;",
         "Truncate Table subscription_logs;",
         "Truncate Table subscription_has_custom;",
         "Truncate Table subscription_qty_adjustment;",
-        "Truncate Table draw_winners;",
-        "Truncate Table dreamlist;",
-        "Truncate Table bank_accounts;",
+
+        # "Truncate Table user;",
         "Truncate Table user_interests;",
-        "Truncate Table user_reset_token;",
         "Truncate Table user_numbers;",
-        "Truncate Table fortune_key_audit;",
-        "Truncate Table fortune_draws;",
+        "Truncate Table user_reset_token;",
+        "Truncate Table user_roles;",
+
+        "Truncate Table vouchers_transaction;",
         "Truncate Table vouchers;",
-        "Truncate Table draw_schedule;",
-        "Truncate Table draws;",
-        "Truncate Table drawing_winner_conf;",
         "Truncate Table voucher_conf;",
-        "Update fortune_key_shuffle_order set status = 0 where status = 1 or status = 2;",
-        "Update fortune_keys set status = 0, assign_date = Null, current_user_id = Null where assign_date is not null "
-        "or status = 1 or status = 2;",
         "SET FOREIGN_KEY_CHECKS = 1;"  # Enable foreign key checks again after truncating
     ]
 
@@ -109,13 +128,14 @@ def create_combo(qty, is_multi, user_id):
             }
         ]
     }
+
     return body
 
 
 def delete_users(conn):
     cursor = conn.cursor(dictionary=True)
     query = """
-            DELETE from user where password = "TEST";   
+            DELETE from user where email like = "%@givtu.com";   
             """
     cursor.execute(query)
     conn.commit()
@@ -130,7 +150,7 @@ def create_user(i, conn):
         """
 
     # Define values for the fake user
-    email = f"user{i}@example.com"
+    email = f"test_user{i}@givtu.com"
     roles = '["ROLE_USER"]'
     password = "TEST"
     is_verified = 1

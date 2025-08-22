@@ -24,25 +24,70 @@ def get_next_draw_date(draw_day, draw_time_hour):
     return next_date
 
 
+def get_current_or_previous_draw_date(draw_day, draw_time_hour):
+    # Calculate the most recent occurrence of the given day and time
+    now = datetime.now()
+    draw_days = {
+        "Monday": 0,
+        "Tuesday": 1,
+        "Wednesday": 2,
+        "Thursday": 3,
+        "Friday": 4,
+        "Saturday": 5,
+        "Sunday": 6
+    }
+    today = now.weekday()
+    day_num = draw_days[draw_day]
+
+    # If the draw day is before or equal to today, find the previous occurrence
+    if day_num <= today:
+        days_behind = today - day_num
+        target_date = now - timedelta(days=days_behind)
+    else:  # Otherwise, calculate it for the upcoming occurrence
+        days_ahead = day_num - today
+        target_date = now + timedelta(days=days_ahead)
+
+    # Set the hour, minute, second, and microsecond for the target date
+    target_date = target_date.replace(hour=draw_time_hour, minute=0, second=0, microsecond=0)
+    return target_date
+
+
 fortune_draws_total = 53
 
 fortune_draws = [
-    {"draw_amount": 10000, "draw_date": "Tuesday", "draw_amount_reset": 5000, "fortune_group": 0, "draw_time_hour": 18},
-    {"draw_amount": 20000, "draw_date": "Wednesday", "draw_amount_reset": 10000, "fortune_group": 0,
+    {"draw_amount": 200000, "draw_date": "Tuesday", "draw_amount_reset": 100000, "fortune_group": 0, "draw_time_hour": 18},
+    {"draw_amount": 210000, "draw_date": "Wednesday", "draw_amount_reset": 110000, "fortune_group": 0,
      "draw_time_hour": 18},
-    {"draw_amount": 40000, "draw_date": "Thursday", "draw_amount_reset": 20000, "fortune_group": 0,
+    {"draw_amount": 220000, "draw_date": "Thursday", "draw_amount_reset": 120000, "fortune_group": 0,
      "draw_time_hour": 18},
-    {"draw_amount": 80000, "draw_date": "Friday", "draw_amount_reset": 40000, "fortune_group": 0, "draw_time_hour": 18},
+    {"draw_amount": 230000, "draw_date": "Friday", "draw_amount_reset": 130000, "fortune_group": 0, "draw_time_hour": 18},
 ]
 
 draw_winner_conf = [
     {"quantity": 1, "label_desc": "GRAND PRIZE", "ticket_type": 1, "draw_order": 1, "value": 2500},
-    {"quantity": 3, "label_desc": "$25", "ticket_type": 0, "draw_order": 1, "value": 25},
-    {"quantity": 5, "label_desc": "FREE TICKET", "ticket_type": 2, "draw_order": 2, "value": None},
+    {"quantity": 4, "label_desc": "$25", "ticket_type": 0, "draw_order": 1, "value": 25},
+    {"quantity": 75, "label_desc": "FREE TICKET", "ticket_type": 2, "draw_order": 2, "value": None},
+    {"quantity": 250, "label_desc": "FORTUNE KEYS", "ticket_type": 3, "draw_order": 1, "value": None},
 ]
 
 # Configuration for different draws
 draws = [
+    {"day": "Tuesday", "name": "Tuesday 1", "start_offset": -4, "start_time": "12:00", "clone_end_time": "11:00",
+     "end_time": "12:00"},
+    {"day": "Tuesday", "name": "Tuesday 2", "start_offset": 0, "start_time": "10:00", "clone_end_time": "13:00",
+     "end_time": "14:00"},
+    {"day": "Wednesday", "name": "Wednesday 1", "start_offset": -1, "start_time": "12:00", "clone_end_time": "11:00",
+     "end_time": "12:00"},
+    {"day": "Wednesday", "name": "Wednesday 2", "start_offset": 0, "start_time": "10:00", "clone_end_time": "13:00",
+     "end_time": "14:00"},
+    {"day": "Thursday", "name": "Thursday 1", "start_offset": -1, "start_time": "12:00", "clone_end_time": "11:00",
+     "end_time": "12:00"},
+    {"day": "Thursday", "name": "Thursday 2", "start_offset": 0, "start_time": "10:00", "clone_end_time": "13:00",
+     "end_time": "14:00"},
+    {"day": "Friday", "name": "Friday 1", "start_offset": -1, "start_time": "12:00", "clone_end_time": "11:00",
+     "end_time": "12:00"},
+    {"day": "Friday", "name": "Friday 2", "start_offset": 0, "start_time": "10:00", "clone_end_time": "13:00",
+     "end_time": "14:00"},
     {"day": "Tuesday", "name": "Tuesday 1", "start_offset": -4, "start_time": "12:00", "clone_end_time": "11:00",
      "end_time": "12:00"},
     {"day": "Tuesday", "name": "Tuesday 2", "start_offset": 0, "start_time": "10:00", "clone_end_time": "13:00",
@@ -69,10 +114,12 @@ def main():
 
     draw_schedule_entries = []
 
-    for draw in draws:
+    for i, draw in enumerate(draws):
         target_day = (["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].index(draw["day"])
                       - day_of_week) % 7
         draw_date = today + timedelta(days=target_day)
+        if i >= 8:
+            draw_date += timedelta(days=7)
 
         start_datetime = draw_date + timedelta(days=draw["start_offset"])
         end_datetime = draw_date
@@ -104,8 +151,8 @@ def main():
             "subdomain": "",
             "start_date": start_datetime,
             "end_date": end_datetime,
-            "ticket_limit": 70,
-            "repeat_number": 7,
+            "ticket_limit": 1000,
+            "repeat_number": 14,
             "active": 1,
             "prize_setting": 0,
             "nfp_setting": 0,
@@ -162,21 +209,35 @@ def main():
             cursor.execute(dwc_query)
 
     # Initialize the records list
-
-    # Update the fortune_draws list with the next occurrence datetime
     for draw in fortune_draws:
-        draw_date = get_next_draw_date(draw["draw_date"], draw["draw_time_hour"])
+        draw_date = get_current_or_previous_draw_date(draw["draw_date"], draw["draw_time_hour"])
         draw["draw_date"] = draw_date.strftime('%Y-%m-%d %H:%M:%S')
         del draw["draw_time_hour"]
-
+    # Add additional fortune draws dynamically up to the total count
     for i in range(len(fortune_draws), fortune_draws_total):
-        draw_date = fortune_draws[i - 4]["draw_date"]
-        draw_date = datetime.strptime(draw_date, '%Y-%m-%d %H:%M:%S') + timedelta(days=7)
-        draw_amount = fortune_draws[-1]['draw_amount'] * 2
-        draw_amount_reset = draw_amount // 2
-        record = {"draw_amount": draw_amount, "draw_date": draw_date.strftime('%Y-%m-%d %H:%M:%S'),
-                  "draw_amount_reset": draw_amount_reset, "fortune_group": 0}
+        last_draw_date = datetime.strptime(fortune_draws[i - 4]["draw_date"], '%Y-%m-%d %H:%M:%S') + timedelta(days=7)
+        # draw_amount = fortune_draws[-1]['draw_amount'] * 2
+        # draw_amount_reset = draw_amount // 2
+        draw_amount = fortune_draws[-1]['draw_amount'] + 10000
+        draw_amount_reset = fortune_draws[-1]['draw_amount_reset'] + 10000
+        record = {
+            "draw_amount": draw_amount,
+            "draw_date": last_draw_date.strftime('%Y-%m-%d %H:%M:%S'),
+            "draw_amount_reset": draw_amount_reset,
+            "fortune_group": 0
+        }
         fortune_draws.append(record)
+
+
+
+    # for i in range(len(fortune_draws), fortune_draws_total):
+    #     draw_date = fortune_draws[i - 4]["draw_date"]
+    #     draw_date = datetime.strptime(draw_date, '%Y-%m-%d %H:%M:%S') + timedelta(days=7)
+    #     draw_amount = fortune_draws[-1]['draw_amount'] * 2
+    #     draw_amount_reset = draw_amount // 2
+    #     record = {"draw_amount": draw_amount, "draw_date": draw_date.strftime('%Y-%m-%d %H:%M:%S'),
+    #               "draw_amount_reset": draw_amount_reset, "fortune_group": 0}
+    #     fortune_draws.append(record)
 
     cursor = connection.cursor(dictionary=True)
     for idx, draw in enumerate(fortune_draws):

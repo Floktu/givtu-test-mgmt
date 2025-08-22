@@ -1,11 +1,13 @@
 from datetime import datetime, timedelta
 import mysql.connector
 from config.config import db_config
+from tests.utils import reset_db
 
 draw_winner_conf = [
     {"quantity": 1, "label_desc": "GRAND PRIZE", "ticket_type": 1, "draw_order": 1, "value": 2500},
-    {"quantity": 3, "label_desc": "$25", "ticket_type": 0, "draw_order": 1, "value": 25},
-    {"quantity": 5, "label_desc": "FREE TICKET", "ticket_type": 2, "draw_order": 2, "value": None},
+    {"quantity": 50, "label_desc": "$25", "ticket_type": 0, "draw_order": 1, "value": 25},
+    {"quantity": 5000, "label_desc": "FREE TICKET", "ticket_type": 2, "draw_order": 2, "value": None},
+    {"quantity": 5000, "label_desc": "FORTUNE KEYS", "ticket_type": 3, "draw_order": 1, "value": None},
 ]
 
 
@@ -14,8 +16,8 @@ def get_datetime_now():
 
 
 def main():
-    connection = mysql.connector.connect(**db_config['gamedev'])
-
+    connection = mysql.connector.connect(**db_config['dev'])
+    reset_db(connection)
     current_date = get_datetime_now()
     if current_date.minute != 0 or current_date.second != 0:
         current_date = current_date.replace(minute=0, second=0, microsecond=0)
@@ -27,7 +29,7 @@ def main():
     draws = []
     fortune_draws = []
 
-    for i in range(8):
+    for i in range(16):
         start_date = set_date
         end_date = start_date + timedelta(minutes=60)
         clone_end_date = start_date + timedelta(minutes=50)
@@ -115,10 +117,10 @@ def main():
     draw_amount = 10000
     fortune_draw_date += timedelta(hours=2)
     cursor = connection.cursor(dictionary=True)
-    for i in range(8):
+    for i in range(1000):
         draw_date = fortune_draw_date
         fortune_draw = {
-            'draw_amount': draw_amount,
+            'draw_amount': min(draw_amount, 1000000),
             'draw_amount_reset': draw_amount // 2,
             'draw_date': draw_date,
             'draw_num': i + 1,

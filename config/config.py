@@ -35,6 +35,15 @@ db_config = {
             'port': 3306,
             'database': 'givtudevsydney',
             'raise_on_warnings': False,
+        },
+    'prod2':
+        {
+            # 'user': 'admin',
+            # 'password': 'mmErtMZ23i5wNSKP3dtwh',
+            # 'host': 'givtuprod-1.c3smuaik4oeg.ap-southeast-2.rds.amazonaws.com',
+            # 'port': 3306,
+            # 'database': 'givtuprod',
+            # 'raise_on_warnings': False,
         }
 }
 

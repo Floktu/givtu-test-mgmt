@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Active Draws and User Queue Counts</title>
+</head>
+<body>
+    <h1>Active Draws</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Draw ID</th>
+                <th>Tickets Sold</th>
+                <th>Launched Date</th>
+                <th>End Date</th>
+                <th>Clone End Date</th>
+            </tr>
+        </thead>
+        <tbody id="activeDrawsTable">
+            <!-- Active draws data will be injected here -->
+        </tbody>
+    </table>
+
+    <h1>User Queue Counts</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>User ID</th>
+                <th>Email</th>
+                <th>Queue Count</th>
+            </tr>
+        </thead>
+        <tbody id="userQueueCountsTable">
+            <!-- User queue counts data will be injected here -->
+        </tbody>
+    </table>
+
+    <script>
+        async function fetchData(url, tableId) {
+            const response = await fetch(url);
+            const data = await response.json();
+
+            const tableBody = document.getElementById(tableId);
+            tableBody.innerHTML = '';
+
+            data.forEach(item => {
+                const row = document.createElement('tr');
+                Object.values(item).forEach(value => {
+                    const cell = document.createElement('td');
+                    cell.textContent = value;
+                    row.appendChild(cell);
+                });
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Fetch the data for both active draws and user queue counts
+        fetchData('/active_draws', 'activeDrawsTable');
+        fetchData('/user_queue_counts', 'userQueueCountsTable');
+    </script>
+</body>
+</html>

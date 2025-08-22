@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  superset:
+    image: apache/superset:latest
+    container_name: superset
+    environment:
+      - LOAD_EXAMPLES=no  # Disable loading sample data
+      - SUPERSET_SECRET_KEY=mysecretkey  # Replace with a secret key
+      - FLASK_APP=superset
+      - DATABASE_URL=mysql://admin:terraformdb123@givtu-stage-sydney-database.coyeaggqwolq.ap-southeast-2.rds.amazonaws.com:3306/givtudevsydney?serverVersion=5.7.40  # Use your RDS MySQL URL
+    ports:
+      - "8088:8088"
+    volumes:
+      - ./superset_home:/app/superset
+    restart: always
+
+  # Removed the Redis service
+
